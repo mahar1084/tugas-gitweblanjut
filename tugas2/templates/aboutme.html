@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Maharani Sabrina</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .cv-container {
+            width: 850px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+        }
+        .sidebar {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            width: 30%;
+            text-align: center;
+        }
+        .sidebar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 3px solid white;
+            object-fit: cover;
+        }
+        .sidebar h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .sidebar p {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .sidebar .contact-info p {
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        .content {
+            padding: 30px;
+            width: 70%;
+        }
+        .content h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .content ul {
+            list-style: none;
+            padding: 0;
+        }
+        .content ul li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-container">
+        <div class="sidebar">
+            <img src="{% static 'Mahar.jpg'%}" alt="Foto Maharani Sabrina">
+            <h2>Maharani Sabrina</h2>
+            <p>Creative & Passionate</p>
+            <div class="contact-info">
+                <p>Email: maharanisabrina0408@gmail.com</p>
+                <p>Telepon: 082183329858</p>
+                <p>Alamat: Jl. Pm Noor, Ahim, Gang Mawar </p>
+            </div>
+        </div>
+        <div class="content">
+            <h2>Data Pribadi</h2>
+            <ul>
+                <li><b>Nama:</b> Maharani Sabrina</li>
+                <li><b>Tempat, Tanggal Lahir:</b> Samarinda, 10 Agustus 2004</li>
+                <li><b>Alamat:</b> Jl. Pm Noor, Ahim, Gang Mawar </li>
+                <li><b>Jenis Kelamin:</b> Perempuan</li>
+                <li><b>Kewarganegaraan:</b> Indonesia</li>
+            </ul>
+
+            <h2>Pendidikan</h2>
+            <ul>
+                <li>SDN 005 Tanah Grogot</li>
+                <li>SMP Muhammadiyah Tanah Grogot</li>
+                <li>SMA Negeri 2 Unggulan Tanah Grogot</li>
+            </ul>
+
+            <h2>Pengalaman</h2>
+            <ul>
+                <li>Anggota English Club</li>
+            </ul>
+
+            <h2>Kemampuan</h2>
+            <ul>
+                <li>Problem Solving</li>
+                <li>Kerja tim dan kolaborasi</li>
+                <li>Time Management</li>
+                <li>Adaptasi dengan cepat</li>
+                <li>Komunikasi yang efektif</li>
+            </ul>
+
+            <h2>Hobi</h2>
+            <ul>
+                <li>Membaca</li>
+                <li>Jogging</li>
+                <li>Fotografi</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-5">Artikel Terbaru</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card product-card">
+                <img src="{{ artikel.gambar.url }}" class="card-img-top" alt="{{ artikel.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ artikel.judul }}</h5>
+                    <p class="card-text">{{ artikel.konten }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
