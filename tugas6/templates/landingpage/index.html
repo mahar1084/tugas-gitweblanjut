@@ -13,9 +13,11 @@
             <div class="row">
               <div class="col-lg-4 col-md-4">
                 <div class="card-image position-relative border-radius-lg">
-                  <div class="blur-shadow-image">
-                    <img class="img border-radius-lg" src="{{ a.gambar.url }}" alt="gambar artikel" loading="lazy">
-                  </div>
+                  {% if a.gambar %}
+                  <img class="img border-radius-lg" src="{{ a.gambar.url }}" alt="gambar artikel" loading="lazy">
+                  {% else %}
+                  <img class="img border-radius-lg" src="{% static 'default.jpg' %}" alt="gambar default" loading="lazy">
+                  {% endif %}
                 </div>
               </div>
               <div class="col-lg-7 col-md-7 my-sm-auto mt-3 ms-sm-3">
@@ -28,7 +30,7 @@
                   <p class="my-auto">Maharani Sabrina</p>
                 </div>
               </div>
-            </div>
+            </div>s
           </div>
         </section>
         {% endfor %}

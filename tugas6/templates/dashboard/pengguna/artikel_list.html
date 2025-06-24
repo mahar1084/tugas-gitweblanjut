@@ -6,7 +6,7 @@
       <div class="card">
         <!-- Card header -->
         <div class="card-header">
-          <h5 class="mb-0">Daftar Artikel Anda<a class="btn btn-outline-warning" href="{% url 'admin_artikel_tambah' %}"> + Tambah</a></h5>
+          <h5 class="mb-0">Daftar Artikel<a class="btn btn-outline-warning" href="{% url 'artikel_tambah' %}"> + Tambah</a></h5>
         </div>
         <div class="table-responsive">
           <table class="table table-flush" id="datatable-search">
@@ -23,9 +23,7 @@
               {% for artikel in artikel %}
               <tr>
                 <td class="text-sm font-weight-normal">{{ forloop.counter }}</td>
-                <td class="text-sm font-weight-normal">
-                {{ artikel.judul }} <br/> <span class="badge badge-primary">created by : {{ artikel.created_by }} </span>
-                </td>
+                <td class="text-sm font-weight-normal">{{ artikel.judul }}</td>
                 <td class="text-sm font-weight-normal">{{ artikel.kategori }}</td>
                 <td class="text-sm font-weight-normal">{{ artikel.status }}</td>
                 <td class="text-sm font-weight-normal text-center">

@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load auth_extras %}
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark" id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
@@ -30,7 +30,7 @@
         </li>
         <hr class="horizontal light mt-0">
         <li class="nav-item mt-3">
-          <h6 class="ps-4  ms-2 text-uppercase text-xs font-weight-bolder text-white">PAGES</h6>
+          <h6 class="ps-4  ms-2 text-uppercase text-xs font-weight-bolder text-white">USER</h6>
         </li>
         <li class="nav-item">
           <a href="#pagesExamples" class="nav-link text-white " aria-controls="pagesExamples" aria-expanded="false">
@@ -39,11 +39,12 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="/" class="nav-link text-white " aria-controls="applicationsExamples" aria-expanded="false">
+          <a href="{% url 'artikel_list' %}"  class="nav-link text-white " aria-controls="applicationsExamples" aria-expanded="false">
             <i class="material-icons-round {% if page.brand == 'RTL' %}ms-2{% else %} me-2{% endif %}">apps</i>
             <span class="nav-link-text ms-2 ps-1">Artikel</span>
           </a>
         </li>
+        {% if request.user|has_group:'operator' %}
         <li class="nav-item">
           <hr class="horizontal light" />
           <h6 class="ps-4  ms-2 text-uppercase text-xs font-weight-bolder text-white">ADMIN</h6>
@@ -55,7 +56,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="" class="nav-link text-white " aria-controls="componentsExamples" role="button" aria-expanded="false">
+          <a href="{% url 'admin_artikel_list' %}" class="nav-link text-white " aria-controls="componentsExamples" role="button" aria-expanded="false">
             <i class="material-icons-round {% if page.brand == 'RTL' %}ms-2{% else %} me-2{% endif %}">view_in_ar</i>
             <span class="nav-link-text ms-2 ps-1">Artikel</span>
           </a>
@@ -67,11 +68,12 @@
             </a>
           </li>
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/creativetimofficial/ct-material-dashboard-pro/blob/master/CHANGELOG.md" target="_blank">
+          <a class="nav-link" href="{% url 'admin_management_user_list' %}">
             <i class="material-icons-round {% if page.brand == 'RTL' %}ms-2{% else %} me-2{% endif %}">face</i>
             <span class="nav-link-text ms-2 ps-1">Users</span>
           </a>
         </li>
+        {% endif %}
       </ul>
     </div>
   </aside>

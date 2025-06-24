@@ -1,90 +1,82 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.paginator import Paginator
-from django.views.generic import ListView, DetailView
-from .models import Artikel, Kategori
-from artikel.forms import KategoriForms
+from django.contrib import messages
+from django.contrib.auth.models import User, Group
 
+from artikel.models import Kategori, Artikel
+from artikel.forms import KategoriForms, ArtikelForms
 
-# ===== Function-based Views =====
+# Create your views here.
+def in_operator(user):
+    get_user = user.groups.filter(name='Operator').count()
+    if get_user == 0:
+        return False
+    else:
+        return True
+
+######################## user bisa ###########################
+@login_required(login_url='/auth-login')
 def artikel_list(request):
-    artikels = Artikel.objects.filter(status=True).order_by('-created_at')
-    paginator = Paginator(artikels, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    template_name = "dashboard/pengguna/artikel_list.html"
+    artikel = Artikel.objects.filter(created_by=request.user)
     context = {
-        'artikels': page_obj,
-        'title': 'Daftar Artikel',
+        "artikel":artikel
     }
-    return render(request, 'artikel_list.html', context)
+    return render(request, template_name, context)
 
-def artikel_detail(request, id):
-    artikel = get_object_or_404(Artikel, id=id, status=True)
+@login_required(login_url='/auth-login')
+def artikel_tambah(request):
+    template_name = "dashboard/admin/artikel_forms.html"
+    if request.method == "POST":
+        forms = ArtikelForms(request.POST, request.FILES)
+        if forms.is_valid():
+            pub = forms.save(commit=False)
+            pub.created_by = request.user
+            pub.save()
+            messages.success(request, 'berhasil tambah artikel')
+        return redirect(artikel_list)
+    forms = ArtikelForms()
     context = {
-        'artikel': artikel,
-        'title': artikel.judul,
+        "forms":forms
     }
-    return render(request, 'detail_artikel.html', context)
+    return render(request, template_name, context)
 
-def kategori_list(request):
-    kategoris = Kategori.objects.all()
+@login_required(login_url='/auth-login')
+def artikel_update(request, id_artikel):
+    template_name = "dashboard/artikel_forms.html"
+    try:
+        artikel = Artikel.objects.get(id=id_artikel, created_by=request.user)
+    except:
+        messages.warning(request, "halaman yang diminta tidak ditemukan")
+        return redirect("/")
+    if request.method == "POST":
+        forms = ArtikelForms(request.POST, request.FILES, instance=artikel)
+        if forms.is_valid():
+            pub = forms.save(commit=False)
+            pub.created_by = request.user
+            pub.save()
+            messages.success(request, 'berhasil melakukan update artikel')
+        return redirect(artikel_list)
+    forms = ArtikelForms(instance=artikel)
     context = {
-        'kategoris': kategoris,
-        'title': 'Daftar Kategori',
+        "forms":forms
     }
-    return render(request, 'kategori_list.html', context)
+    return render(request, template_name, context)
 
-def artikel_list_by_kategori(request, kategori_slug):
-    kategori = get_object_or_404(Kategori, slug=kategori_slug)
-    artikels = Artikel.objects.filter(kategori=kategori, status=True).order_by('-created_at')
-    paginator = Paginator(artikels, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {
-        'artikels': page_obj,
-        'kategori': kategori,
-        'title': kategori.nama,
-    }
-    return render(request, 'artikel_list_by_kategori.html', context)
+@login_required(login_url='/auth-login')
+def artikel_delete(request, id_artikel):
+    try:
+        Artikel.objects.get(id=id_artikel, created_by=request.user).delete()
+        messages.success(request, 'berhasil delete artikel')
+    except:
+        messages.error(request, 'gagal delete artikel')
+    
+    return redirect(artikel_list)
 
-# ===== Class-based Views =====
-class ArtikelListView(ListView):
-    model = Artikel
-    template_name = 'artikel_list.html'
-    context_object_name = 'artikels'
-    queryset = Artikel.objects.filter(status=True).order_by('-created_at')
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Daftar Artikel'
-        return context
-
-class ArtikelDetailView(DetailView):
-    model = Artikel
-    template_name = 'detail_artikel.html'
-    context_object_name = 'artikel'
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(Artikel, id=self.kwargs['id'], status=True)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = self.object.judul
-        return context
-
-class KategoriListView(ListView):
-    model = Kategori
-    template_name = 'kategori_list.html'
-    context_object_name = 'kategoris'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Daftar Kategori'
-        return context
 
 ###################### ADMIN #########################
 @login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
 def admin_kategori_list(request):
     template_name = "dashboard/admin/kategori_list.html"
     kategori = Kategori.objects.all()
@@ -94,6 +86,7 @@ def admin_kategori_list(request):
     return render(request, template_name, context)
 
 @login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
 def admin_kategori_tambah(request):
     template_name = "dashboard/admin/kategori_forms.html"
     if request.method == "POST":
@@ -102,6 +95,7 @@ def admin_kategori_tambah(request):
             pub = forms.save(commit=False)
             pub.created_by = request.user
             pub.save()
+            messages.success(request, 'berhasil tambah kategori')
         return redirect(admin_kategori_list)
     forms = KategoriForms
     context = {
@@ -110,6 +104,7 @@ def admin_kategori_tambah(request):
     return render(request, template_name, context)
 
 @login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
 def admin_kategori_update(request, id_kategori):
     template_name = "dashboard/admin/kategori_forms.html"
     kategori = Kategori.objects.get(id=id_kategori)
@@ -119,6 +114,7 @@ def admin_kategori_update(request, id_kategori):
             pub = forms.save(commit=False)
             pub.created_by = request.user
             pub.save()
+            messages.success(request, 'berhasil update kategori')
         return redirect(admin_kategori_list)
     forms = KategoriForms(instance=kategori)
     context = {
@@ -127,10 +123,139 @@ def admin_kategori_update(request, id_kategori):
     return render(request, template_name, context)
 
 @login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
 def admin_kategori_delete(request, id_kategori):
     try:
         Kategori.objects.get(id=id_kategori).delete()
+        messages.success(request, 'berhasil delete kategori')
     except:
-        pass
+        messages.error(request, 'gagal delete kategori')
     
     return redirect(admin_kategori_list)
+
+############## Artikel Blog ##################
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_artikel_list(request):
+    template_name = "dashboard/admin/artikel_list.html"
+    artikel = Artikel.objects.all()
+    context = {
+        "artikel":artikel
+    }
+    return render(request, template_name, context)
+
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_artikel_tambah(request):
+    template_name = "dashboard/admin/artikel_forms.html"
+    if request.method == "POST":
+        forms = ArtikelForms(request.POST, request.FILES)
+        if forms.is_valid():
+            pub = forms.save(commit=False)
+            pub.created_by = request.user
+            pub.save()
+            messages.success(request, 'berhasil tambah artikel')
+        return redirect(admin_artikel_list)
+    forms = ArtikelForms()
+    context = {
+        "forms":forms
+    }
+    return render(request, template_name, context)
+
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_artikel_update(request, id_artikel):
+    template_name = "dashboard/admin/artikel_forms.html"
+    artikel = Artikel.objects.get(id=id_artikel)
+    if request.method == "POST":
+        forms = ArtikelForms(request.POST, request.FILES, instance=artikel)
+        if forms.is_valid():
+            pub = forms.save(commit=False)
+            pub.created_by = request.user
+            pub.save()
+            messages.success(request, 'berhasil melakukan update artikel')
+        return redirect(admin_artikel_list)
+    forms = ArtikelForms(instance=artikel)
+    context = {
+        "forms":forms
+    }
+    return render(request, template_name, context)
+
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_artikel_delete(request, id_artikel):
+    try:
+        Artikel.objects.get(id=id_artikel).delete()
+        messages.success(request, 'berhasil delete artikel')
+    except:
+        messages.error(request, 'gagal delete artikel')
+    
+    return redirect(admin_artikel_list)
+
+
+def detail_artikel(request, id):
+    template_name = "landingpage/detail_artikel.html"
+    try:
+        artikel = Artikel.objects.get(id=id)
+    except Artikel.DoesNotExist:
+        return redirect(not_found_artikel)
+    
+    artikel_lainnya = Artikel.objects.all().exclude(id=id)
+    
+    context = {
+        "title":"Artikel",
+        "artikel": artikel,
+        "artikel_lainnya":artikel_lainnya
+    }
+    return render(request, template_name, context)
+
+################### Management User Oleh Operator ###################
+
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_management_user_list(request):
+    template_name = "dashboard/admin/user_list.html"  # Assuming a common template naming convention
+    daftar_user = User.objects.all()
+    context = {
+        "daftar_user": daftar_user
+    }
+    return render(request, template_name, context)
+
+@login_required(login_url='/auth-login')
+@user_passes_test(in_operator, login_url='/')
+def admin_management_user_edit(request, user_id):
+    template_name = "dashboard/admin/user_edit.html"
+    user = get_object_or_404(User, pk=user_id)  # Ambil objek user berdasarkan ID, atau 404 jika tidak ditemukan
+
+    all_groups = Group.objects.all()
+    group_user = []
+    for group in user.groups.all():
+        group_user.append(group.name)
+
+    if request.method == 'POST':
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        is_staff_input = request.POST.get("is_staff")  
+        groups_checked = request.POST.getlist('groups')
+
+        if is_staff_input is None:
+            is_staff = False
+        else:
+            is_staff = True
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.is_staff = is_staff
+        user.groups.set(Group.objects.filter(id__in=groups_checked))
+        user.save()
+
+        messages.success(request, f"Berhasil update user {user.username}")
+        return redirect('admin_management_user_list')  # Redirect ke halaman daftar user setelah berhasil
+
+    context = {
+        'user': user,
+        'all_groups': all_groups,
+        'group_user': group_user,
+        
+    }
+    return render(request, template_name, context)
