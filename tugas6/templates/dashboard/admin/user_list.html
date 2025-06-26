@@ -4,7 +4,6 @@
 <div class="row mt-4">
     <div class="col-12">
       <div class="card">
-        <!-- Card header -->
         <div class="card-header">
           <h5 class="mb-0">Daftar User Anda</h5>
         </div>
@@ -42,7 +41,8 @@
                 </td>
                 <td class="text-sm font-weight-normal text-center">
                   <a class="btn btn-warning btn-sm" href="{% url 'admin_management_user_edit' user.id %}">Edit</a>
-                  <a class="btn btn-danger btn-sm" onclick="return confirm('yakin ingin delete?')" href="">Delete</a>
+                  {# PERBAIKAN DI SINI: tambahkan URL untuk tombol Delete #}
+                  <a class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini ({{ user.username }})?')" href="{% url 'admin_management_user_delete' user.id %}">Delete</a>
                 </td>
               </tr>
               {% endfor %}

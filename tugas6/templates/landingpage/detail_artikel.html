@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="card card-body shadow-xl mx-3 mx-md-4 mt-n6">
-    <!-- START Blogs w/ 3 images & quote & text -->
     <section class="py-5 mt-5">
       <div class="container">
         <div class="row">
@@ -15,10 +14,37 @@
               {{ artikel.konten }}
             </p>
             <p class="text-dark" style="font-style: italic;">{{ artikel.created_at }}</p>
-          </div>
+
+            <div class="container mt-5">
+                <h4>Komentar</h4>
+                <div id="comments-list" class="mt-3">
+                    <p>Memuat komentar...</p>
+                </div>
+
+                {% if user.is_authenticated %} {# Tampilkan form komentar hanya jika user login #}
+                <div class="card mt-4 mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tambahkan Komentar Baru</h5>
+                        <form id="comment-form">
+                            {% csrf_token %} {# Penting untuk keamanan Django #}
+                            <div class="mb-3">
+                                <label for="comment-content" class="form-label">Komentar Anda:</label>
+                                <textarea class="form-control" id="comment-content" rows="3" required></textarea>
+                            </div>
+                            <input type="hidden" id="artikel-id" value="{{ artikel.id }}">
+                            <button type="submit" class="btn btn-primary">Kirim Komentar</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="mt-4 mb-4">Silakan <a href="{% url 'auth-login' %}">login</a> untuk meninggalkan komentar.</p>
+                {% endif %}
+            </div>
+            </div>
         </div>
       </div>
     </section>
+
     <section class="py-7">
       <div class="container">
         <div class="row">
@@ -58,4 +84,105 @@
       </div>
     </section>
   </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const commentsListDiv = document.getElementById('comments-list');
+        const commentForm = document.getElementById('comment-form');
+        const commentContentInput = document.getElementById('comment-content');
+        const artikelIdInput = document.getElementById('artikel-id');
+        const artikelId = artikelIdInput ? artikelIdInput.value : null; // Ambil ID artikel dari input hidden
+
+        if (!artikelId) {
+            console.error('ID artikel tidak ditemukan di template.');
+            commentsListDiv.innerHTML = '<p>Kesalahan: Tidak dapat memuat komentar tanpa ID artikel.</p>';
+            return;
+        }
+
+        // Fungsi untuk mengambil dan menampilkan komentar
+        async function fetchComments() {
+            try {
+                // Mengambil token CSRF dari meta tag atau cookie
+                const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : null;
+                if (!csrfToken) {
+                    console.warn("CSRF token not found in meta tag. Ensure it's available or use cookie method.");
+                }
+
+                // Kita asumsikan API komentar bisa difilter berdasarkan artikel_id
+                // URL API Komentar yang Anda daftarkan adalah '/api/comments/'
+                const response = await fetch(`/api/comments/?artikel=${artikelId}`); // Menggunakan query param 'artikel'
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const comments = await response.json();
+                commentsListDiv.innerHTML = ''; // Kosongkan daftar komentar sebelumnya
+
+                if (comments.length === 0) {
+                    commentsListDiv.innerHTML = '<p>Belum ada komentar.</p>';
+                    return;
+                }
+
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'card mb-2'; // Styling Bootstrap
+                    commentElement.innerHTML = `
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Oleh: ${comment.user_username || 'Anonim'} pada ${new Date(comment.created_at).toLocaleString()}
+                            </h6>
+                            <p class="card-text">${comment.content}</p>
+                        </div>
+                    `;
+                    commentsListDiv.appendChild(commentElement);
+                });
+            } catch (error) {
+                console.error('Gagal mengambil komentar:', error);
+                commentsListDiv.innerHTML = '<p>Gagal memuat komentar.</p>';
+            }
+        }
+
+        // Fungsi untuk mengirim komentar baru
+        if (commentForm) { // Pastikan form ada (hanya jika user login)
+            commentForm.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Mencegah reload halaman
+
+                const content = commentContentInput.value;
+                // Ambil CSRF token dari input hidden di form
+                const csrfToken = document.querySelector('#comment-form input[name="csrfmiddlewaretoken"]').value;
+
+                try {
+                    const response = await fetch('/api/comments/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken // Kirim CSRF token di header
+                        },
+                        body: JSON.stringify({
+                            artikel: artikelId, // Kirim ID artikel
+                            content: content,
+                            // 'user' tidak perlu dikirim dari frontend, karena sudah ditangani oleh perform_create di views.py
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Gagal mengirim komentar:', errorData);
+                        alert('Gagal mengirim komentar: ' + JSON.stringify(errorData));
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Jika sukses, kosongkan input dan muat ulang komentar
+                    commentContentInput.value = '';
+                    await fetchComments(); // Muat ulang komentar untuk menampilkan yang baru
+                } catch (error) {
+                    console.error('Terjadi kesalahan saat mengirim komentar:', error);
+                    alert('Terjadi kesalahan saat mengirim komentar.');
+                }
+            });
+        }
+
+        // Panggil fetchComments saat halaman dimuat
+        fetchComments();
+    });
+</script>
 {% endblock %}

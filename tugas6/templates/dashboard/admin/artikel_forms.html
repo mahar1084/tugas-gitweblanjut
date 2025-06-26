@@ -2,9 +2,71 @@
 {% load static %}
 {% block css %}
 <style>
-  .django-ckeditor-widget {
-    width: 100%;
-  }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+
+    /* CSS tambahan untuk memperbaiki tampilan forms.gambar */
+    .form-group-gambar {
+        margin-top: 20px; /* Memberi jarak dari elemen di atasnya */
+        margin-bottom: 20px; /* Memberi jarak ke elemen di bawahnya */
+    }
+
+    /* Target elemen yang dirender oleh ClearableFileInput */
+    .form-group-gambar .form-control {
+        /* Gaya ini diterapkan ke input file itu sendiri */
+        height: auto; /* Penting untuk input file */
+    }
+
+    .form-group-gambar p {
+        margin-bottom: 5px; /* Sedikit jarak antar paragraf (misal: "Currently: ...") */
+        display: block; /* Pastikan paragraf mengambil baris penuh */
+        clear: both; /* Penting jika ada elemen float di sekitarnya */
+    }
+
+    .form-group-gambar .form-check {
+        margin-top: 10px; /* Jarak dari link gambar sebelumnya */
+        margin-bottom: 10px;
+        display: flex; /* Menggunakan flexbox untuk check dan label */
+        align-items: center;
+    }
+
+    .form-group-gambar label[for$="-clear"] {
+        margin-left: 5px; /* Jarak dari checkbox */
+    }
+
+    /* Untuk teks "Change:" yang dihasilkan Django */
+    .form-group-gambar label:not([for$="-clear"]):not(.form-label) {
+        display: block; /* Memastikan label seperti "Change:" ada di baris baru */
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    /* Fallback jika label "Change:" tidak dirender sebagai <label> */
+    .form-group-gambar span:has(input[type="file"]) {
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    /* Styling untuk select box Choices.js */
+    .choices[data-type*="select-one"] .choices__inner {
+        padding: 0.25rem 0.75rem; /* Sesuaikan padding */
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        min-height: 48px; /* Material Dashboard input height */
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+    }
+    .choices__list.choices__list--single {
+        padding: 0;
+    }
+    .choices__item.choices__item--selectable {
+        padding-top: 10px; /* Adjust padding for selected item text */
+        padding-bottom: 10px;
+    }
 </style>
 <link href="{% static 'django_ckeditor_5/dist/styles.css' %}" media="all" rel="stylesheet"/>
 <script src="{% static 'django_ckeditor_5/dist/bundle.js' %}"></script>
@@ -24,23 +86,33 @@
             <form method="POST" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
                 <div class="input-group input-group-dynamic">
-                    <label for="projectName" class="form-label">Judul</label>
+                    <label for="{{ forms.judul.id_for_label }}" class="form-label">Judul</label>
                     {{ forms.judul }}
                 </div>
                 <br /><br />
                 <div class="input-group input-group-dynamic">
-                    <label for="projectName" class="form-label">Konten</label>
+                    <label for="{{ forms.konten.id_for_label }}" class="form-label">Konten</label>
                     {{ forms.konten }}
                 </div>
-                <div class="input-group input-group-dynamic">
-                  <label class="form-label">Kategori</label>{{ forms.kategori }}
+
+                {# BAGIAN INI UNTUK KATEGORI (FIXED) #}
+                <div class="form-group mb-3"> {# Gunakan form-group dan mb-3 untuk margin #}
+                  <label class="form-label" for="{{ forms.kategori.id_for_label }}">Kategori</label>
+                  {{ forms.kategori }}
+                </div>
+                <br /> {# Hapus <br><br> yang berlebihan setelah form group jika sudah cukup margin #}
+                
+                {# BAGIAN INI UNTUK FORMS.GAMBAR (FIXED) #}
+                <div class="form-group-gambar">
+                    <label class="form-label">Gambar Artikel</label>
+                    {{ forms.gambar }}
                 </div>
                 <br /><br />
-                <div class="input-group input-group-dynamic">{{ forms.gambar }}</div>
-                <br /><br />
+
+                {# BAGIAN INI UNTUK STATUS (TIDAK DIUBAH SESUAI PERMINTAAN) #}
                 <div class="input-group input-group-dynamic">Status : &nbsp{{ forms.status }}</div>
                 <div class="d-flex justify-content-end mt-4">
-                   <button type="submit" name="button" class="btn bg-gradient-dark m-0 ms-2">Simpan</button>
+                    <button type="submit" name="button" class="btn bg-gradient-dark m-0 ms-2">Simpan</button>
                 </div>
             </form>
         </div>
@@ -54,4 +126,18 @@
 <script src="{% static 'dashboard/assets/js/plugins/quill.min.js' %}"></script>
 <script src="{% static 'dashboard/assets/js/plugins/flatpickr.min.js' %}"></script>
 <script src="{% static 'dashboard/assets/js/plugins/dropzone.min.js' %}"></script>
+
+{# SCRIPT UNTUK INISIALISASI CHOICES.JS (Hanya untuk Kategori) #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectKategoriElement = document.getElementById('{{ forms.kategori.id_for_label }}');
+        if (selectKategoriElement) {
+            new Choices(selectKategoriElement, {
+                searchEnabled: false, // Atur ke true jika ingin ada fitur pencarian
+                itemSelectText: '', // Hapus teks "Press to select"
+            });
+        }
+        // Inisialisasi untuk forms.status TIDAK DILAKUKAN di sini sesuai permintaan.
+    });
+</script>
 {% endblock %}

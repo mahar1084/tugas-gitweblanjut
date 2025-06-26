@@ -51,13 +51,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_ckeditor_5',
-    
+
+    # Aplikasi Anda
     'artikel',
-    'galeri'
+    'galeri',
+
+    # Debug Toolbar
+    'debug_toolbar',
+
+    # Django REST Framework (Tambahkan ini)
+    'rest_framework', # TAMBAHKAN BARIS INI
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,20 +99,13 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'artikel_blog',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'HOST': 'localhost',    # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
 }
@@ -144,7 +145,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = "/media/"
@@ -155,6 +156,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Konfigurasi CKEditor
 customColorPalette = [
         {
             'color': 'hsl(4, 90%, 58%)',
@@ -203,7 +205,7 @@ CKEDITOR_5_CONFIGS = {
         'toolbar': {
             'items': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
                       'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
-                    'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
+                    'bulletedList', 'numberedList', 'todoList', '|',   'blockQuote', 'imageUpload', '|',
                     'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
                     'insertTable',
                     ],
@@ -211,7 +213,7 @@ CKEDITOR_5_CONFIGS = {
         },
         'image': {
             'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
-                        'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',  '|'],
+                         'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',   '|'],
             'styles': [
                 'full',
                 'side',
@@ -250,3 +252,8 @@ CKEDITOR_5_CONFIGS = {
         }
     }
 }
+
+# Untuk Django Debug Toolbar
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
