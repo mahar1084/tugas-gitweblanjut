@@ -59,8 +59,14 @@ INSTALLED_APPS = [
     # Debug Toolbar
     'debug_toolbar',
 
-    # Django REST Framework (Tambahkan ini)
-    'rest_framework', # TAMBAHKAN BARIS INI
+    # Django REST Framework
+    'rest_framework',
+
+    # ==============================================================
+    # imagekit
+    # ==============================================================
+    'imagekit', 
+    # ==============================================================
 ]
 
 MIDDLEWARE = [
