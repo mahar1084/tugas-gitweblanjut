@@ -1,51 +1,80 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+
 {% block content %}
 <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <!-- Card header -->
-        <div class="card-header">
-          <h5 class="mb-0">Daftar Artikel<a class="btn btn-outline-warning" href="{% url 'artikel_tambah' %}"> + Tambah</a></h5>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-flush" id="datatable-search">
-            <thead class="thead-light">
-              <tr>
-                <th>No</th>
-                <th>Judul</th>
-                <th>Kategori</th>
-                <th>Status</th>
-                <th class="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for artikel in artikel %}
-              <tr>
-                <td class="text-sm font-weight-normal">{{ forloop.counter }}</td>
-                <td class="text-sm font-weight-normal">{{ artikel.judul }}</td>
-                <td class="text-sm font-weight-normal">{{ artikel.kategori }}</td>
-                <td class="text-sm font-weight-normal">{{ artikel.status }}</td>
-                <td class="text-sm font-weight-normal text-center">
-                  <a class="btn btn-warning btn-sm" href="{% url 'admin_artikel_update' artikel.id %}">Edit</a>
-                  <a class="btn btn-danger btn-sm" onclick="return confirm('yakin ingin delete?')" href="{% url 'admin_artikel_delete' artikel.id %}">Delete</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+  <div class="col-12">
+    <div class="card shadow border-0 rounded-4">
+      <!-- Header -->
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daftar Artikel</h5>
+        <a class="btn btn-outline-warning btn-sm" href="{% url 'artikel_tambah' %}">
+          + Tambah
+        </a>
+      </div>
+
+      <!-- Tabel -->
+      <div class="table-responsive p-3">
+        <table class="table align-items-center mb-0" id="datatable-search">
+          <thead class="bg-light text-xs text-uppercase text-secondary font-weight-bold">
+            <tr>
+              <th>No</th>
+              <th>Judul</th>
+              <th>Kategori</th>
+              <th>Status</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for artikel in artikel %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                {{ artikel.judul }} <br/>
+                <span class="badge bg-gradient-info mt-1">oleh {{ artikel.created_by }}</span>
+              </td>
+              <td><span class="badge bg-gradient-dark">{{ artikel.kategori }}</span></td>
+              <td>
+                {% if artikel.status == "published" %}
+                  <span class="badge bg-success">Published</span>
+                {% elif artikel.status == "draft" %}
+                  <span class="badge bg-secondary">Draft</span>
+                {% else %}
+                  <span class="badge bg-warning">-</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <a href="{% url 'admin_artikel_update' artikel.id %}" class="btn btn-sm btn-warning me-1">
+                  <i class="material-icons">edit</i>
+                </a>
+                <a href="{% url 'admin_artikel_delete' artikel.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Yakin ingin menghapus artikel ini?')">
+                  <i class="material-icons">delete</i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 {% endblock content %}
 
 {% block js %}
 <script src="{% static 'dashboard/assets/js/plugins/datatables.js' %}"></script>
 <script>
-    const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
-      searchable: true,
-      fixedHeight: true
-    });
-  </script>
+  const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
+    searchable: true,
+    fixedHeight: true,
+    perPage: 10,
+    labels: {
+      placeholder: "Cari artikel...",
+      perPage: "Tampilkan {select} artikel per halaman",
+      noRows: "Belum ada data artikel",
+      info: "Menampilkan {start} - {end} dari {rows} artikel"
+    }
+  });
+</script>
 {% endblock %}

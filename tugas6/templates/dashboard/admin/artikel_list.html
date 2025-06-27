@@ -1,53 +1,78 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+
 {% block content %}
 <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <!-- Card header -->
-        <div class="card-header">
-          <h5 class="mb-0">Daftar Artikel Anda<a class="btn btn-outline-warning" href="{% url 'admin_artikel_tambah' %}"> + Tambah</a></h5>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-flush" id="datatable-search">
-            <thead class="thead-light">
-              <tr>
-                <th>No</th>
-                <th>Judul</th>
-                <th>Kategori</th>
-                <th>Status</th>
-                <th class="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for artikel in artikel %}
-              <tr>
-                <td class="text-sm font-weight-normal">{{ forloop.counter }}</td>
-                <td class="text-sm font-weight-normal">
-                {{ artikel.judul }} <br/> <span class="badge badge-primary">created by : {{ artikel.created_by }} </span>
-                </td>
-                <td class="text-sm font-weight-normal">{{ artikel.kategori }}</td>
-                <td class="text-sm font-weight-normal">{{ artikel.status }}</td>
-                <td class="text-sm font-weight-normal text-center">
-                  <a class="btn btn-warning btn-sm" href="{% url 'admin_artikel_update' artikel.id %}">Edit</a>
-                  <a class="btn btn-danger btn-sm" onclick="return confirm('yakin ingin delete?')" href="{% url 'admin_artikel_delete' artikel.id %}">Delete</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+  <div class="col-12">
+    <div class="card shadow border-0 rounded-4">
+      <!-- Header -->
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daftar Artikel Anda</h5>
+        <a class="btn btn-outline-warning btn-sm" href="{% url 'admin_artikel_tambah' %}"><i class="material-icons">add</i> Tambah Artikel</a>
+      </div>
+
+      <!-- Tabel Artikel -->
+      <div class="table-responsive p-3">
+        <table class="table align-items-center mb-0" id="datatable-search">
+          <thead class="thead-light bg-light">
+            <tr>
+              <th class="text-uppercase text-secondary text-xs font-weight-bold">No</th>
+              <th class="text-uppercase text-secondary text-xs font-weight-bold">Judul</th>
+              <th class="text-uppercase text-secondary text-xs font-weight-bold">Kategori</th>
+              <th class="text-uppercase text-secondary text-xs font-weight-bold">Status</th>
+              <th class="text-uppercase text-secondary text-xs text-center font-weight-bold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for artikel in artikel %}
+            <tr>
+              <td class="text-sm">{{ forloop.counter }}</td>
+              <td class="text-sm">
+                <strong>{{ artikel.judul }}</strong><br>
+                <span class="badge bg-gradient-primary mt-1">created by: {{ artikel.created_by }}</span>
+              </td>
+              <td class="text-sm">{{ artikel.kategori }}</td>
+              <td class="text-sm">
+                {% if artikel.status == 'draft' %}
+                  <span class="badge bg-secondary">{{ artikel.status }}</span>
+                {% elif artikel.status == 'publish' %}
+                  <span class="badge bg-success">{{ artikel.status }}</span>
+                {% else %}
+                  {{ artikel.status }}
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <a href="{% url 'admin_artikel_update' artikel.id %}" class="btn btn-sm btn-warning me-1">
+                  <i class="material-icons">edit</i>
+                </a>
+                <a href="{% url 'admin_artikel_delete' artikel.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Yakin ingin menghapus artikel ini?')">
+                  <i class="material-icons">delete</i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 {% endblock content %}
 
 {% block js %}
 <script src="{% static 'dashboard/assets/js/plugins/datatables.js' %}"></script>
 <script>
-    const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
-      searchable: true,
-      fixedHeight: true
-    });
-  </script>
+  const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
+    searchable: true,
+    fixedHeight: true,
+    perPage: 10,
+    labels: {
+      placeholder: "Cari artikel...",
+      perPage: "Tampilkan {select} artikel per halaman",
+      noRows: "Tidak ada artikel ditemukan",
+      info: "Menampilkan {start} - {end} dari {rows} artikel"
+    }
+  });
+</script>
 {% endblock %}

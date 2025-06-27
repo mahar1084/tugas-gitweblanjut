@@ -188,11 +188,11 @@ def admin_artikel_tambah(request):
             pub.created_by = request.user
             pub.save()
             messages.success(request, 'berhasil tambah artikel')
-            print("Artikel berhasil disimpan di database!") # Pernyataan debugging
+            print("Artikel berhasil disimpan di database!") 
             return redirect(admin_artikel_list)
         else:
-            print("Form tidak valid saat tambah artikel:") # Pernyataan debugging
-            print(forms.errors) # Ini akan menampilkan kesalahan validasi form
+            print("Form tidak valid saat tambah artikel:") 
+            print(forms.errors) 
     forms = ArtikelForms()
     context = {
         "forms":forms

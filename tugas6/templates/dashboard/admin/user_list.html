@@ -1,65 +1,82 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+
 {% block content %}
 <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">Daftar User Anda</h5>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-flush" id="datatable-search">
-            <thead class="thead-light">
-              <tr>
-                <th>No</th>
-                <th>Username</th>
-                <th>Nama Lengkap</th>
-                <th>Is Staff</th>
-                <th>Groups</th>
-                <th class="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for user in daftar_user %}
-              <tr>
-                <td class="text-sm font-weight-center">{{ forloop.counter }}</td>
-                <td class="text-sm font-weight-center"><span class="badge badge-success">{{ user.username }}</span></td>
-                <td class="text-sm font-weight-center" style="color:blue">{{ user.first_name|default:"-" }} {{ user.last_name|default:"-" }}</td>
-                <td class="text-sm font-weight-center" name="is_staff">
-                    {% if user.is_staff %}
-                    <i class=" btn btn-success btn-sm fas fa-check text-green-500">Staff</i>
-                    {% else %}
-                    <i class="btn btn-danger btn-sm fas fa-times text-red-500">Pengguna</i>
-                    {% endif %}
-                </td>
-                <td class="text-sm font-weight-center">
-                  {% for group in user.groups.all  %}
-                  <span class="badge badge-dark">{{ group.name }}</span>
-                  {% empty %}
-                  <span class="badge badge-dark">-</span>
-                  {% endfor %}
-                </td>
-                <td class="text-sm font-weight-normal text-center">
-                  <a class="btn btn-warning btn-sm" href="{% url 'admin_management_user_edit' user.id %}">Edit</a>
-                  {# PERBAIKAN DI SINI: tambahkan URL untuk tombol Delete #}
-                  <a class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini ({{ user.username }})?')" href="{% url 'admin_management_user_delete' user.id %}">Delete</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+  <div class="col-12">
+    <div class="card shadow border-0 rounded-4">
+      <!-- Header -->
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daftar Pengguna</h5>
+      </div>
+
+      <!-- Tabel User -->
+      <div class="table-responsive p-3">
+        <table class="table align-items-center mb-0" id="datatable-search">
+          <thead class="bg-light text-xs text-uppercase text-secondary font-weight-bold">
+            <tr>
+              <th>No</th>
+              <th>Username</th>
+              <th>Nama Lengkap</th>
+              <th>Status</th>
+              <th>Group</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in daftar_user %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><span class="badge bg-gradient-success text-white">{{ user.username }}</span></td>
+              <td style="color: #4e73df;">
+                {{ user.first_name|default:"-" }} {{ user.last_name|default:"-" }}
+              </td>
+              <td>
+                {% if user.is_staff %}
+                  <span class="badge bg-gradient-info">Staff</span>
+                {% else %}
+                  <span class="badge bg-gradient-secondary">Pengguna</span>
+                {% endif %}
+              </td>
+              <td>
+                {% for group in user.groups.all %}
+                  <span class="badge bg-dark text-white">{{ group.name }}</span>
+                {% empty %}
+                  <span class="badge bg-secondary">-</span>
+                {% endfor %}
+              </td>
+              <td class="text-center">
+                <a href="{% url 'admin_management_user_edit' user.id %}" class="btn btn-sm btn-warning me-1">
+                  <i class="material-icons">edit</i>
+                </a>
+                <a href="{% url 'admin_management_user_delete' user.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini ({{ user.username }})?')">
+                  <i class="material-icons">delete</i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 {% endblock content %}
 
 {% block js %}
 <script src="{% static 'dashboard/assets/js/plugins/datatables.js' %}"></script>
 <script>
-    const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
-      searchable: true,
-      fixedHeight: true
-    });
-  </script>
+  const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
+    searchable: true,
+    fixedHeight: true,
+    perPage: 10,
+    labels: {
+      placeholder: "Cari pengguna...",
+      perPage: "Tampilkan {select} user per halaman",
+      noRows: "Belum ada data pengguna",
+      info: "Menampilkan {start} - {end} dari {rows} pengguna"
+    }
+  });
+</script>
 {% endblock %}
